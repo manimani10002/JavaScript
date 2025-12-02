@@ -1,98 +1,118 @@
-## advanced-function2: 함수, 이벤트, 반복의 현대적인 활용
+## 💡 advanced-function2: 화살표 함수, 이벤트, 배열 메서드, 클로저
 
-### 1\. ➡️ 화살표 함수 (Arrow Function)
 
-화살표 함수는 **함수를 간결하게 작성**하기 위해 ES6에서 도입된 문법이며, 특히 콜백 함수를 사용할 때 코드를 훨씬 깔끔하게 만듭니다.
 
-#### 개념 및 문법
+### 1\. ➡️ 화살표 함수 (Arrow Functions)
 
-- **간결성:** `function` 키워드 대신 화살표 `=>`를 사용합니다.
-- **자동 반환:** 함수 본문이 한 줄이고 `return`만 있다면, 중괄호 `{}`와 `return`을 생략할 수 있습니다.
-- **`this` 고정 (Lexical `this`):** 가장 중요한 특징으로, 화살표 함수는 자신이 정의된 \*\*외부 환경의 `this`\*\*를 그대로 가져와 사용합니다. 이 덕분에 `this` 값이 예상치 않게 바뀌는 혼란을 방지할 수 있습니다.
+화살표 함수는 ES6에서 도입된, 함수를 정의하는 **간결한 문법**입니다. 특히 콜백 함수를 정의할 때 코드를 매우 깔끔하게 만들어 줍니다.
 
-#### 코드 예시
+| 형태 | 기본 (`function` 표현식) | **화살표 함수 (Arrow Function)** |
+| :--- | :--- | :--- |
+| **기본** | `const func = function() { ... };` | `const func = () => { ... };` |
+| **단일 반환** | `const add = function(a, b) { return a + b; };` | `const add = (a, b) => a + b;` |
 
-```javascript
-// 1. 기본 형식
-const arrowFunction = () => {
-  console.log('hello');
-};
-arrowFunction(); // 함수 실행
+#### 1.1. 화살표 함수의 핵심 특징: `this`의 고정
 
-// 2. 이벤트 리스너 콜백 함수로 활용 (가장 일반적인 용례)
-buttonElement.addEventListener('click', () => {
-  console.log('클릭2');
-});
-```
+화살표 함수는 **자신만의 `this`를 가지지 않고**, 함수가 정의된 **가장 가까운 외부 스코프의 `this`를 상속**받습니다 (**Lexical `this`**).
 
----
+  * **장점:** `this`가 갑자기 바뀌는 복잡한 상황(특히 타이머나 콜백 내부)을 방지하고 예측 가능하게 만듭니다.
+  * **주의점:** **객체의 메서드**나 **생성자 함수**처럼 `this`가 동적으로 해당 객체를 가리켜야 할 때는 일반 함수 (`function`)를 사용해야 합니다.
 
-### 2\. 👂 이벤트 리스너 (`addEventListener`)
+-----
 
-이벤트 리스너는 웹 페이지의 특정 요소에서 발생하는 사건(이벤트)을 감지하고, 그 사건이 발생했을 때 JavaScript 함수(콜백 함수)를 실행하여 웹 페이지를 **상호작용적**으로 만듭니다.
+### 2\. 👂 이벤트 리스너 (`.addEventListener()`)
 
-#### 기본 구문 및 작동 방식
+`addEventListener()`는 DOM 요소에 특정 사건(이벤트)이 발생했을 때 실행할 콜백 함수를 등록하는 표준 방법입니다.
 
-`addEventListener`는 두 개의 필수 인자를 받습니다.
-
-1.  **이벤트 타입:** 감지할 이벤트의 종류 (예: `'click'`, `'keydown'`).
-2.  **리스너 함수:** 이벤트 발생 시 실행할 **콜백 함수**.
-
-<!-- end list -->
+#### 2.1. 기본 구문
 
 ```javascript
-// 1. DOM 요소 선택
-const buttonElement = document.querySelector('.js-button');
-
-// 2. 리스너 함수를 변수에 할당 (제거를 위해 필수!)
-const eventListener = () => {
-  console.log('click');
-};
-
-// 3. 리스너 등록: 'click' 이벤트 발생 시 eventListener 함수 실행 예약
-buttonElement.addEventListener('click', eventListener);
+element.addEventListener('event-type', callbackFunction);
 ```
 
-#### 리스너 제거 (`removeEventListener`)의 중요성
+  * **`event-type`:** 감지할 이벤트 종류 (예: `'click'`, `'keydown'`).
+  * **`callbackFunction`:** 이벤트 발생 시 실행될 함수입니다. 주로 **화살표 함수**가 사용됩니다.
 
-불필요한 동작이나 메모리 낭비를 막기 위해 등록된 리스너를 제거할 수 있습니다.
+#### 2.2. 리스너 제거 (`.removeEventListener()`)
 
-- **제거 성공 조건:** 등록할 때 사용했던 \*\*함수와 동일한 참조(Reference)\*\*를 `removeEventListener`에 전달해야 합니다.
-
-<!-- end list -->
+불필요한 동작을 막고 메모리를 관리하기 위해 리스너를 제거할 수 있습니다.
 
 ```javascript
-// 등록된 함수 참조를 사용하여 정확하게 리스너 제거
-buttonElement.removeEventListener('click', eventListener);
+const handler = () => { console.log('실행'); };
+
+button.addEventListener('click', handler);
+button.removeEventListener('click', handler); // 반드시 등록 시 사용한 '함수 참조'를 사용해야 합니다.
 ```
 
-- **익명 함수 문제:** `addEventListener('click', () => { ... })`와 같이 익명 함수로 등록하면, 이 함수를 변수에 저장하지 않았기 때문에 나중에 `removeEventListener`로 제거할 수 없습니다. 따라서 **제거할 필요가 있는 리스너**는 반드시 **변수에 할당**하여 사용해야 합니다.
+> **주의:** 익명 함수 (`() => {}` 형태로 바로 등록한 함수)는 참조를 저장할 수 없어 `removeEventListener`로 제거할 수 없습니다.
 
----
+-----
 
-### 3\. ♻️ 배열 순회 (`forEach`)
+### 3\. 🗺️ 배열 반복 및 변환 메서드
 
-`forEach()`는 배열의 모든 요소를 순회하며 각 요소에 대해 지정된 콜백 함수를 실행하는 **배열 전용 메서드**입니다. `for` 루프를 대체하는 현대적인 방법입니다.
+JavaScript 배열은 반복문을 대체하고 데이터 조작을 간결하게 하는 강력한 내장 메서드를 제공합니다.
 
-#### 구문 및 인자
+#### 3.1. `.forEach()` (단순 반복)
 
-`forEach()`는 인자로 **콜백 함수** 하나를 받으며, 이 콜백 함수는 배열의 요소 수만큼 반복 실행됩니다.
+배열의 모든 요소에 대해 함수를 실행합니다. 반환 값은 없으며, 단순히 배열을 순회할 때 사용됩니다.
 
 ```javascript
 const arr = [1, 2, 3];
-
-// forEach는 콜백 함수에 value와 index를 자동으로 전달합니다.
 arr.forEach((value, index) => {
-  console.log(`인덱스 ${index}의 값은 ${value}입니다.`);
+    console.log(`값: ${value}`);
 });
+// (for 루프와 달리 break로 중단할 수 없습니다.)
 ```
 
-| 인자        | 역할                                         |
-| :---------- | :------------------------------------------- |
-| **`value`** | 현재 순회 중인 **배열 요소의 값**            |
-| **`index`** | 현재 순회 중인 **배열 요소의 인덱스** (위치) |
+#### 3.2. `.filter()` (조건 필터링)
 
-#### `for` 루프와의 차이점
+배열의 각 요소를 순회하며, 콜백 함수가 \*\*`true`\*\*를 반환하는 요소들만 모아 **새로운 배열**로 반환합니다.
 
-- `forEach()`는 `for` 루프보다 코드가 간결하고 가독성이 높습니다.
-- 가장 큰 차이는 **반복 제어**입니다. `forEach()`는 반복 중에 `break`나 `continue`를 사용하여 **중단하거나 건너뛸 수 없습니다**. 따라서 단순히 배열의 모든 요소에 대해 작업을 실행할 때 유용합니다.
+```javascript
+const numbers = [10, 25, 30];
+// 20보다 큰 요소만 필터링
+const bigNumbers = numbers.filter(n => n > 20); 
+console.log(bigNumbers); // 출력: [25, 30]
+```
+
+#### 3.3. `.map()` (요소 변환)
+
+배열의 모든 요소를 순회하며, 콜백 함수가 반환하는 값들을 모아 **새로운 배열**로 반환합니다. 배열의 형태는 유지하면서 각 요소의 값을 변환할 때 사용됩니다.
+
+```javascript
+const costs = [100, 200, 300];
+// 모든 값에 10%를 더한 새로운 배열 생성
+const taxedCosts = costs.map(cost => cost * 1.1); 
+console.log(taxedCosts); // 출력: [110, 220, 330]
+```
+
+-----
+
+### 4\. 🔒 클로저 (Closure)
+
+클로저는 \*\*"외부 함수가 종료된 후에도, 내부 함수가 외부 함수의 변수에 접근할 수 있는 현상"\*\*이자, 이 내부 함수 자체를 의미합니다.
+
+#### 4.1. 클로저의 원리
+
+JavaScript 함수는 자신이 **선언될 당시**의 환경(스코프)을 기억합니다. 외부 함수가 실행을 마쳐도, 내부 함수가 그 환경 내의 변수(자유 변수)를 계속 참조하고 있다면, 그 변수는 메모리에서 제거되지 않고 유지됩니다.
+
+```javascript
+function createCounter() {
+  let count = 0; // 👈 이 변수가 클로저에 의해 '캡처'됨
+  
+  // 내부 함수가 외부 함수의 변수(count)를 참조합니다.
+  return function() { 
+    count += 1;
+    return count;
+  };
+}
+
+const counter = createCounter(); // createCounter는 실행이 끝났지만...
+console.log(counter()); // 출력: 1 (count 변수는 여전히 살아있음)
+console.log(counter()); // 출력: 2 (상태가 유지됨)
+```
+
+#### 4.2. 클로저의 용도
+
+  * **상태 유지:** 함수가 호출될 때마다 독립적인 상태(예: 위 예시의 `count`)를 유지해야 할 때 사용됩니다.
+  * **정보 은닉 (캡슐화):** 외부에서 `count` 변수에 직접 접근하는 것을 막고, 내부 함수를 통해서만 조작하도록 할 수 있어 안전한 코드 작성이 가능합니다.
